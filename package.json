@@ -1,0 +1,26 @@
+{
+  "name": "wallet-connect",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "dependencies": {
+    "@walletconnect/sign-client": "^2.0.0",
+    "bcrypt": "^5.0.1",
+    "cookie-parser": "^1.4.6",
+    "csurf": "^1.11.0",
+    "dotenv": "^16.0.3",
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "express-mysql-session": "^2.1.0",
+    "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
+    "qrcode": "^1.5.1",
+    "web3": "^1.7.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
