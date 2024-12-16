@@ -1,2 +1,2 @@
 # Wallet-Connect
-connect your wallet with web3,js
+connect your wallet with web3.js
