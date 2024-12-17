@@ -1,7 +1,10 @@
-const walletController = require('../controllers/walletController');
-const { isAuthenticated } = require('../middleware/authMiddleware');
+const express = require('express');
+const router = express.Router();
+const authController = require('../controllers/authController'); // Changed from walletController to authController
+const { isAuthenticated, verifyToken } = require('../middleware/authMiddleware');
 
-router.get('/connect', isAuthenticated, walletController.connect);
-router.post('/transfer', isAuthenticated, walletController.transfer);
+// Assuming the transfer functionality has been merged into authController
+router.get('/connect', isAuthenticated, authController.connect); 
+router.post('/transfer', isAuthenticated, verifyToken, authController.transfer);
 
 module.exports = router;
