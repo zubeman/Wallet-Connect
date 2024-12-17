@@ -24,7 +24,7 @@ async function connectWallet(req) {
   const qrCodeBase64 = await QRCode.toDataURL(uri);
   const session = await approval();
   
-  // Store wallet session
+  // Store wallet session in session
   req.session.walletSession = session;
   return { uri, qrCodeBase64, session };
 }
