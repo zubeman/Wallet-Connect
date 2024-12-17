@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const cookieParser = require('cookie-parser');
@@ -28,6 +29,18 @@ app.use(session({
   store: sessionStore,
   cookie: { secure: true, httpOnly: true, sameSite: 'strict', maxAge: 3600000 } // 1 hour session
 }));
+
+// Serve static files from the views directory
+app.use(express.static(path.join(__dirname, '../views')));
+
+// Define routes to serve views
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../views/login.html'));
+});
+
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../views/dashboard.html'));
+});
 
 // CSRF Protection
 app.use(csurf({ cookie: true }));
