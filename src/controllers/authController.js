@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const walletService = require('../services/walletService'); // Assuming this service exists for wallet operations
+const Transaction = require('../models/Transaction'); // For logging transactions
 
 exports.register = async (req, res, next) => {
   try {
@@ -39,4 +41,29 @@ exports.logout = (req, res) => {
     }
     res.json({ message: 'Logged out successfully' });
   });
+};
+
+// Added Wallet Connection and Transfer Methods
+exports.connect = async (req, res, next) => {
+  try {
+    await walletService.initWalletConnect();
+    const walletSession = await walletService.connectWallet(req, res);
+    res.json({ message: 'Wallet connected', session: walletSession });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.transfer = async (req, res, next) => {
+  try {
+    const result = await walletService.initiateTransfer(req, res);
+    if (result.success) {
+      await Transaction.log(req.session.userId, result.txHash, result.amount);
+      res.json({ message: 'Transfer initiated', txHash: result.txHash });
+    } else {
+      res.status(500).json({ error: 'Transfer failed', details: result.error });
+    }
+  } catch (error) {
+    next(error);
+  }
 };
