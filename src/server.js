@@ -6,15 +6,20 @@ const MySQLStore = require('express-mysql-session')(session);
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const csurf = require('csurf');
+const helmet = require('helmet'); // Added for security headers
 const authRoutes = require('./routes/authRoutes');
 const walletRoutes = require('./routes/walletRoutes');
 const { errorHandler } = require('./utils/errorHandler');
+const http = require('http'); // For WebSocket server
+const { Server } = require('socket.io'); // WebSocket support
 
 const app = express();
+const server = http.createServer(app); // Create HTTP server for WebSocket
 const dbConfig = require('./config/db.config');
 
 // Middleware
 app.use(morgan('combined')); // Logging
+app.use(helmet()); // Security headers
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -27,7 +32,12 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: sessionStore,
-  cookie: { secure: true, httpOnly: true, sameSite: 'strict', maxAge: 3600000 } // 1 hour session
+  cookie: { 
+    secure: 'auto', // Use 'auto' for Vercel's HTTPS detection
+    httpOnly: true,
+    sameSite: 'strict',
+    maxAge: 3600000 // 1 hour session
+  }
 }));
 
 // Serve static files from the views directory
@@ -46,11 +56,40 @@ app.get('/dashboard', (req, res) => {
 app.use(csurf({ cookie: true }));
 
 // Routes
-app.use('/', authRoutes);
-app.use('/', walletRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/wallet', walletRoutes);
+
+// WebSocket server setup for real-time functionality
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('A user connected via WebSocket');
+  
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+
+  // Example event for checking wallet status
+  socket.on('checkStatus', async (userId) => {
+    try {
+      const walletStatus = await require('./controllers/authController').getWalletStatus(userId);
+      socket.emit('statusUpdate', walletStatus);
+    } catch (error) {
+      console.error('Error in checkStatus:', error);
+      socket.emit('statusUpdate', { error: 'Failed to check status' });
+    }
+  });
+
+  // Additional WebSocket event handlers can be added here
+});
 
 // Error Handling
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
