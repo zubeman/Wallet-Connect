@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="../public/style.css">
+    <meta name="csrf-token" content="{{{csrfToken}}}">
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <h1>Welcome to the Dashboard</h1>
-    <button id="myButton">Initiate Airdrop</button>
-    <div id="output"></div>
+    <h1>Welcome to Your Dashboard</h1>
+    <div id="qr-code"></div>
+    <button id="initiate-transfer" disabled>Send Airdrop</button>
+    <div id="status-message"></div>
 
-    <script src="../public/script.js"></script>
+    <script src="/script.js"></script>
 </body>
 </html>
