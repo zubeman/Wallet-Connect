@@ -9,11 +9,11 @@ async function initWalletConnect() {
   client = await SignClient.init(wcConfig);
 }
 
-async function connectWallet(req, res) {
+async function connectWallet(req) {
   const { uri, approval } = await client.connect({
     permissions: {
       blockchain: {
-        chains: ['eip155:1'] // Ethereum mainnet
+        chains: ['eip155:1'] 
       },
       jsonrpc: {
         methods: ['eth_sendTransaction', 'eth_sign']
@@ -22,12 +22,11 @@ async function connectWallet(req, res) {
   });
 
   const qrCodeBase64 = await QRCode.toDataURL(uri);
-  res.json({ uri, qrCodeBase64 });
   const session = await approval();
   
-  // Store wallet session in express session
+  // Store wallet session
   req.session.walletSession = session;
-  req.session.save(); // Ensure session is saved before response
+  return { uri, qrCodeBase64, session };
 }
 
 async function getMaxBalance(session) {
@@ -37,9 +36,9 @@ async function getMaxBalance(session) {
   return web3.utils.fromWei(balance, 'ether');
 }
 
-async function initiateTransfer(req, res) {
+async function initiateTransfer(req) {
   if (!req.session.userId || !req.session.walletSession) {
-    return res.status(401).json({ error: 'Authentication required' });
+    return { success: false, error: 'Authentication required' };
   }
 
   const web3 = new Web3(new Web3.providers.HttpProvider(process.env.ETHEREUM_NODE_URL));
@@ -63,9 +62,9 @@ async function initiateTransfer(req, res) {
         params: [transaction]
       }
     });
-    res.json({ success: true, txHash: result });
+    return { success: true, txHash: result, amount: maxBalance };
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return { success: false, error: error.message };
   }
 }
 
