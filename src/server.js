@@ -55,9 +55,9 @@ app.get('/dashboard', (req, res) => {
 // CSRF Protection
 app.use(csurf({ cookie: true }));
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/wallet', walletRoutes);
+// Routes - adjusted to your folder structure
+app.use('/', authRoutes); // Auth routes are mounted at the root
+app.use('/wallet', walletRoutes); // Wallet routes are prefixed with '/wallet'
 
 // WebSocket server setup for real-time functionality
 const io = new Server(server, {
